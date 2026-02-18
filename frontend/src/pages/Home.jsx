@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wand2 } from 'lucide-react';
-import axios from "axios";
-import { BACKEND_URL } from '../config';
+import { Zap } from 'lucide-react'; // Changed icon import
+// import axios from "axios";
+// import { BACKEND_URL } from '../config';
 
 export function Home() {
   const [prompt, setPrompt] = useState('');
@@ -16,33 +16,38 @@ export function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#181c20] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <Wand2 className="w-12 h-12 text-blue-400" />
+        <div className="text-center mb-10">
+          <div className="flex justify-center mb-6">
+            <span className="bg-[#23272f] backdrop-blur-lg rounded-full p-4 shadow-lg border border-white/10">
+              <Zap className="w-14 h-14 text-yellow-400 drop-shadow-lg" /> {/* Changed icon */}
+            </span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-100 mb-4">
-            Website Builder AI
+          <h1 className="text-5xl font-extrabold text-white mb-3 tracking-tight drop-shadow-lg">
+            Website Builder <span className="text-yellow-400">AI</span>
           </h1>
-          <p className="text-lg text-gray-300">
-            Describe your dream website, and we'll help you build it step by step
+          <p className="text-xl text-gray-200 font-light max-w-xl mx-auto">
+            Describe your dream website and let AI help you build it, step by step.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="bg-gray-800 rounded-lg shadow-lg p-6">
+          <div className="bg-[#23272f] backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/10">
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Describe the website you want to build..."
-              className="w-full h-32 p-4 bg-gray-900 text-gray-100 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none placeholder-gray-500"
+              className="w-full h-36 p-5 bg-white/5 text-white border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none placeholder-gray-400 text-lg transition"
             />
             <button
               type="submit"
-              className="w-full mt-4 bg-blue-600 text-gray-100 py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="w-full mt-6 bg-yellow-400 text-gray-900 py-4 px-8 rounded-xl font-semibold text-lg shadow-lg hover:bg-yellow-500 transition-all duration-200"
             >
-              Generate Website Plan
+              <span className="flex items-center justify-center gap-2">
+                <Zap className="w-5 h-5" />
+                Generate Website Plan
+              </span>
             </button>
           </div>
         </form>

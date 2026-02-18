@@ -20,6 +20,7 @@ function Component() {
 
 export default Component;`;
 
+
 export function Builder() {
   const location = useLocation();
   const { prompt } = location.state;
@@ -34,72 +35,49 @@ export function Builder() {
   const [selectedFile, setSelectedFile] = useState(null);
   
   const [steps, setSteps] = useState([]);
-
   const [files, setFiles] = useState([]);
 
-  useEffect(() => {
-    let originalFiles = [...files];
-    let updateHappened = false;
-    steps.filter(({status}) => status === "pending").map(step => {
-      updateHappened = true;
-      if (step?.type === "CreateFile") {
-        let parsedPath = step.path?.split("/") ?? []; // ["src", "components", "App.tsx"]
-        let currentFileStructure = [...originalFiles]; // {}
-        let finalAnswerRef = currentFileStructure;
-  
-        let currentFolder = ""
-        while(parsedPath.length) {
-          currentFolder =  `${currentFolder}/${parsedPath[0]}`;
-          let currentFolderName = parsedPath[0];
-          parsedPath = parsedPath.slice(1);
-  
-          if (!parsedPath.length) {
-            // final file
-            let file = currentFileStructure.find(x => x.path === currentFolder)
-            if (!file) {
-              currentFileStructure.push({
-                name: currentFolderName,
-                type: 'file',
-                path: currentFolder,
-                content: step.code
-              })
-            } else {
-              file.content = step.code;
-            }
+  // Build a nested file/folder tree from steps
+  function buildFileTree(steps) {
+    const StepType = { CreateFile: 0 };
+    const root = [];
+    steps.forEach(step => {
+      if (step.type !== StepType.CreateFile || !step.path) return;
+      const parts = step.path.split("/");
+      let current = root;
+      let currentPath = "";
+      for (let i = 0; i < parts.length; i++) {
+        currentPath = currentPath ? `${currentPath}/${parts[i]}` : parts[i];
+        let node = current.find(x => x.name === parts[i]);
+        if (!node) {
+          if (i === parts.length - 1) {
+            node = {
+              name: parts[i],
+              type: "file",
+              path: currentPath,
+              content: step.code
+            };
           } else {
-            /// in a folder
-            let folder = currentFileStructure.find(x => x.path === currentFolder)
-            if (!folder) {
-              // create the folder
-              currentFileStructure.push({
-                name: currentFolderName,
-                type: 'folder',
-                path: currentFolder,
-                children: []
-              })
-            }
-  
-            currentFileStructure = currentFileStructure.find(x => x.path === currentFolder).children;
+            node = {
+              name: parts[i],
+              type: "folder",
+              path: currentPath,
+              children: []
+            };
           }
+          current.push(node);
         }
-        originalFiles = finalAnswerRef;
+        if (node.type === "folder") {
+          current = node.children;
+        }
       }
+    });
+    return root;
+  }
 
-    })
-
-    if (updateHappened) {
-
-      setFiles(originalFiles)
-      setSteps(steps => steps.map((s) => {
-        return {
-          ...s,
-          status: "completed"
-        }
-        
-      }))
-    }
-    console.log(files);
-  }, [steps, files]);
+  useEffect(() => {
+    setFiles(buildFileTree(steps));
+  }, [steps]);
 
   useEffect(() => {
     const createMountStructure = (files) => {

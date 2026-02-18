@@ -1,13 +1,12 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { FileViewerProps } from '../../types';
 
-export function FileViewer({ file, onClose }: FileViewerProps) {
+export function FileViewer({ file, onClose }) {
   if (!file) return null;
 
-  file,
-  onClose,
-) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+      <div className="bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 className="text-lg font-medium text-gray-100">{file.path}</h3>
           <button
