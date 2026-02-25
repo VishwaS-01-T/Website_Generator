@@ -154,10 +154,18 @@ export function Builder() {
 
     setLoading(false);
 
-    setSteps(s => [...s, ...parseXml(stepsResponse.data.response).map(x => ({
-      ...x,
-      status: "pending"
-    }))]);
+    setSteps(prevSteps => {
+  const newSteps = parseXml(stepsResponse.data.response).map(x => ({
+    ...x,
+    status: "pending"
+  }));
+  // Remove any previous steps for files that are being updated
+  const updatedPaths = newSteps.map(s => s.path).filter(Boolean);
+  const filteredPrev = prevSteps.filter(
+    s => !updatedPaths.includes(s.path)
+  );
+  return [...filteredPrev, ...newSteps];
+});
 
     setLlmMessages([...prompts, prompt].map(content => ({
       role: "user",
