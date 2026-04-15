@@ -28,7 +28,7 @@ export function Builder() {
   const [llmMessages, setLlmMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [templateSet, setTemplateSet] = useState(false);
-  const webcontainer = useWebContainer();
+  const { webcontainer } = useWebContainer();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [activeTab, setActiveTab] = useState('code');
@@ -79,13 +79,14 @@ export function Builder() {
     setFiles(buildFileTree(steps));
   }, [steps]);
 
-  useEffect(() => {
+useEffect(() => {
+    if (!webcontainer || !files.length) return;
+
     const createMountStructure = (files) => {
       const mountStructure = {};
   
       const processFile = (file, isRootFolder) => {  
         if (file.type === 'folder') {
-          // For folders, create a directory entry
           mountStructure[file.name] = {
             directory: file.children ? 
               Object.fromEntries(
@@ -101,7 +102,6 @@ export function Builder() {
               }
             };
           } else {
-            // For files, create a file entry with contents
             return {
               file: {
                 contents: file.content || ''
@@ -113,17 +113,24 @@ export function Builder() {
         return mountStructure[file.name];
       };
   
-      // Process each top-level file/folder
       files.forEach(file => processFile(file, true));
   
       return mountStructure;
     };
-  
+    
     const mountStructure = createMountStructure(files);
-  
-    // Mount the structure if WebContainer is available
-    console.log(mountStructure);
-    webcontainer?.mount(mountStructure);
+    
+    console.log('Mounting files:', mountStructure);
+    
+    const mountFiles = async () => {
+      try {
+        await webcontainer.mount(mountStructure);
+      } catch (err) {
+        console.error('Mount error:', err);
+      }
+    };
+    
+    mountFiles();
   }, [files, webcontainer]);
 
   async function init() {
@@ -255,7 +262,7 @@ export function Builder() {
               {activeTab === 'code' ? (
                 <CodeEditor file={selectedFile} />
               ) : (
-                <PreviewFrame webContainer={webcontainer} files={files} />
+                <PreviewFrame webContainer={webcontainer} />
               )}
             </div>
           </div>
